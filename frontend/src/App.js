@@ -319,6 +319,7 @@ const AppUI = () => {
     files.forEach((file) => formData.append('files', file))
 
     try {
+      console.log('Sending request to:', `${BACKEND_URL}/upload`);
       const uploadResponse = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
@@ -328,6 +329,7 @@ const AppUI = () => {
       }
       const uploadData = await uploadResponse.json()
 
+      console.log('Sending request to:', `${BACKEND_URL}/upscale`);
       const upscaleResponse = await fetch(`${BACKEND_URL}/upscale`, {
         method: 'POST',
         headers: {
@@ -340,6 +342,7 @@ const AppUI = () => {
       }
       const upscaleData = await upscaleResponse.json()
 
+      console.log('Sending request to:', `${BACKEND_URL}/analyze`);
       const analyzeResponse = await fetch(`${BACKEND_URL}/analyze`, {
         method: 'POST',
         headers: {
@@ -366,6 +369,7 @@ const AppUI = () => {
       console.error('Error processing images:', error);
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         console.error('Network error: Unable to reach the server. Please check if the backend is running and accessible.');
+        console.error('Backend URL:', BACKEND_URL);
       }
     }
   }
