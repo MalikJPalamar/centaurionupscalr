@@ -9,7 +9,7 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://c960ef1a-9ad8-47cc-a409-4df798b5ef95-00-3iwmnseqrzh1o.worf.replit.dev';
 
 const LandingPage = ({ setActiveTab }) => {
   const [landingSliderValue, setLandingSliderValue] = useState(50)
@@ -380,7 +380,7 @@ const AppUI = () => {
         console.error('Network error: Unable to reach the server. Please check if the backend is running and accessible.');
         console.error('Backend URL:', BACKEND_URL);
       }
-      alert('There was an error uploading your file. Please try again.');
+      alert('There was an error processing your images. Please try again. Error: ' + error.message);
     }
   }
 
