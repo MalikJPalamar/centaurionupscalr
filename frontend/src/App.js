@@ -10,22 +10,6 @@ import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
 
-const histogramData = [
-  { value: 0, original: 100, upscaled: 80 },
-  { value: 64, original: 150, upscaled: 130 },
-  { value: 128, original: 200, upscaled: 220 },
-  { value: 192, original: 120, upscaled: 140 },
-  { value: 255, original: 80, upscaled: 100 },
-]
-
-const qualityMetrics = [
-  { name: 'PSNR', original: 30, upscaled: 35 },
-  { name: 'SSIM', original: 0.8, upscaled: 0.9 },
-  { name: 'Edge Quality', original: 70, upscaled: 85 },
-  { name: 'Noise Level', original: 20, upscaled: 10 },
-  { name: 'Texture Sharpness', original: 75, upscaled: 90 },
-]
-
 const LandingPage = ({ setActiveTab }) => {
   const [landingSliderValue, setLandingSliderValue] = useState(50)
 

@@ -1,5 +1,7 @@
 import os
 import uuid
+import asyncio
+import aiohttp
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -36,14 +38,23 @@ def upload_files():
     
     return jsonify({'filenames': uploaded_files}), 200
 
+async def process_image(filename, input_path, output_path):
+    try:
+        await asyncio.to_thread(upscale_image, input_path, output_path)
+        return output_path
+    except Exception as e:
+        print(f"Error processing {filename}: {str(e)}")
+        return None
+
 @app.route('/upscale', methods=['POST'])
-def upscale():
+async def upscale():
     data = request.json
     filenames = data.get('filenames')
     if not filenames:
         return jsonify({'error': 'No filenames provided'}), 400
     
     upscaled_files = []
+    tasks = []
     for filename in filenames:
         input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if not os.path.exists(input_path):
@@ -52,16 +63,24 @@ def upscale():
         output_filename = f"upscaled_{filename}"
         output_path = os.path.join(app.config['UPLOAD_FOLDER'], output_filename)
         
-        try:
-            upscale_image(input_path, output_path)
-            upscaled_files.append(output_filename)
-        except Exception as e:
-            return jsonify({'error': f'Error processing {filename}: {str(e)}'}), 500
+        task = asyncio.create_task(process_image(filename, input_path, output_path))
+        tasks.append(task)
+    
+    results = await asyncio.gather(*tasks)
+    upscaled_files = [os.path.basename(path) for path in results if path]
     
     return jsonify({'upscaled_filenames': upscaled_files}), 200
 
+async def analyze_image_async(original_path, upscaled_path):
+    try:
+        result = await asyncio.to_thread(analyze_image, original_path, upscaled_path)
+        return result
+    except Exception as e:
+        print(f"Error analyzing {original_path} and {upscaled_path}: {str(e)}")
+        return None
+
 @app.route('/analyze', methods=['POST'])
-def analyze():
+async def analyze():
     data = request.json
     original_filenames = data.get('original_filenames')
     upscaled_filenames = data.get('upscaled_filenames')
@@ -70,6 +89,7 @@ def analyze():
         return jsonify({'error': 'Invalid filenames provided'}), 400
     
     analysis_results = []
+    tasks = []
     for original_filename, upscaled_filename in zip(original_filenames, upscaled_filenames):
         original_path = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
         upscaled_path = os.path.join(app.config['UPLOAD_FOLDER'], upscaled_filename)
@@ -77,15 +97,17 @@ def analyze():
         if not os.path.exists(original_path) or not os.path.exists(upscaled_path):
             return jsonify({'error': f'One or both files not found: {original_filename}, {upscaled_filename}'}), 404
         
-        try:
-            result = analyze_image(original_path, upscaled_path)
+        task = asyncio.create_task(analyze_image_async(original_path, upscaled_path))
+        tasks.append((original_filename, upscaled_filename, task))
+    
+    for original_filename, upscaled_filename, task in tasks:
+        result = await task
+        if result:
             analysis_results.append({
                 'original_filename': original_filename,
                 'upscaled_filename': upscaled_filename,
                 'analysis': result
             })
-        except Exception as e:
-            return jsonify({'error': f'Error analyzing {original_filename} and {upscaled_filename}: {str(e)}'}), 500
     
     return jsonify(analysis_results), 200
 
