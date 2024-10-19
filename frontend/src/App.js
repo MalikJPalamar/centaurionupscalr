@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Button } from "./components/ui/button"
 import { Slider } from "./components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs"
@@ -119,11 +119,12 @@ const LandingPage = ({ setActiveTab }) => {
   )
 }
 
-const ImageComparison = () => {
+const ImageComparison = ({ images }) => {
   const [sliderValue, setSliderValue] = useState(50)
   const [zoomIndex, setZoomIndex] = useState(0)
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const handleSliderChange = (value) => {
     setSliderValue(value[0])
@@ -153,6 +154,16 @@ const ImageComparison = () => {
     return () => window.removeEventListener('mouseup', handleMouseUpGlobal)
   }, [])
 
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  const currentImage = images[currentImageIndex]
+
   return (
     <Card>
       <CardHeader>
@@ -165,7 +176,7 @@ const ImageComparison = () => {
              onMouseDown={handleMouseDown}
              onMouseUp={handleMouseUp}>
           <img
-            src="/placeholder.svg?height=500&width=800"
+            src={currentImage.original}
             alt="Original"
             className="absolute top-0 left-0 w-full h-full object-cover"
           />
@@ -176,7 +187,7 @@ const ImageComparison = () => {
             }}
           >
             <img
-              src="/placeholder.svg?height=500&width=800"
+              src={currentImage.upscaled}
               alt="Upscaled"
               className="absolute top-0 left-0 w-full h-full object-cover"
             />
@@ -196,7 +207,7 @@ const ImageComparison = () => {
               }}
             >
               <img
-                src="/placeholder.svg?height=500&width=800"
+                src={currentImage.original}
                 alt="Magnified Original"
                 className="absolute w-[800px] h-[500px] object-cover"
                 style={{
@@ -213,7 +224,7 @@ const ImageComparison = () => {
                 }}
               >
                 <img
-                  src="/placeholder.svg?height=500&width=800"
+                  src={currentImage.upscaled}
                   alt="Magnified Upscaled"
                   className="absolute w-[800px] h-[500px] object-cover"
                   style={{
@@ -242,12 +253,28 @@ const ImageComparison = () => {
             <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
+        <div className="flex justify-between mt-4">
+          <Button onClick={handlePrevImage} disabled={images.length <= 1}>Previous Image</Button>
+          <Button onClick={handleNextImage} disabled={images.length <= 1}>Next Image</Button>
+        </div>
       </CardContent>
     </Card>
   )
 }
 
-const ImageAnalysis = () => {
+const ImageAnalysis = ({ images }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  const currentImage = images[currentImageIndex]
+
   return (
     <Card>
       <CardHeader>
@@ -262,7 +289,7 @@ const ImageAnalysis = () => {
           </TabsList>
           <TabsContent value="histogram">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={histogramData}>
+              <BarChart data={currentImage.analysis.histogram}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="value" />
                 <YAxis />
@@ -275,24 +302,77 @@ const ImageAnalysis = () => {
           </TabsContent>
           <TabsContent value="metrics">
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={qualityMetrics}>
+              <LineChart data={[currentImage.analysis]}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="original" stroke="#8884d8" name="Original" />
-                <Line type="monotone" dataKey="upscaled" stroke="#82ca9d" name="Upscaled" />
+                <Line type="monotone" dataKey="psnr" name="PSNR" stroke="#8884d8" />
+                <Line type="monotone" dataKey="ssim" name="SSIM" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="edge_quality" name="Edge Quality" stroke="#ffc658" />
               </LineChart>
             </ResponsiveContainer>
           </TabsContent>
         </Tabs>
+        <div className="flex justify-between mt-4">
+          <Button onClick={handlePrevImage} disabled={images.length <= 1}>Previous Image</Button>
+          <Button onClick={handleNextImage} disabled={images.length <= 1}>Next Image</Button>
+        </div>
       </CardContent>
     </Card>
   )
 }
 
 const AppUI = () => {
+  const [images, setImages] = useState([])
+  const fileInputRef = useRef(null)
+
+  const handleFileUpload = async (event) => {
+    const files = Array.from(event.target.files)
+    const formData = new FormData()
+    files.forEach((file) => formData.append('files', file))
+
+    try {
+      const uploadResponse = await fetch('http://localhost:5000/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const uploadData = await uploadResponse.json()
+
+      const upscaleResponse = await fetch('http://localhost:5000/upscale', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filenames: uploadData.filenames }),
+      })
+      const upscaleData = await upscaleResponse.json()
+
+      const analyzeResponse = await fetch('http://localhost:5000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          original_filenames: uploadData.filenames,
+          upscaled_filenames: upscaleData.upscaled_filenames,
+        }),
+      })
+      const analyzeData = await analyzeResponse.json()
+
+      const newImages = analyzeData.map((item) => ({
+        original: `http://localhost:5000/image/${item.original_filename}`,
+        upscaled: `http://localhost:5000/image/${item.upscaled_filename}`,
+        analysis: item.analysis,
+      }))
+
+      setImages(newImages)
+    } catch (error) {
+      console.error('Error processing images:', error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <header className="mb-8">
@@ -301,12 +381,23 @@ const AppUI = () => {
       </header>
 
       <main className="space-y-8">
-        <ImageComparison />
-        <ImageAnalysis />
+        {images.length > 0 && (
+          <>
+            <ImageComparison images={images} />
+            <ImageAnalysis images={images} />
+          </>
+        )}
         <Card>
           <CardContent className="flex justify-center py-6">
-            <Button size="lg">
-              <Upload className="mr-2 h-4 w-4" /> Upload New Image
+            <input
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+              ref={fileInputRef}
+            />
+            <Button size="lg" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="mr-2 h-4 w-4" /> Upload Images
             </Button>
           </CardContent>
         </Card>
