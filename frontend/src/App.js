@@ -324,10 +324,13 @@ const AppUI = () => {
         method: 'POST',
         body: formData,
       })
+      console.log('Upload response status:', uploadResponse.status);
       if (!uploadResponse.ok) {
-        throw new Error(`HTTP error! status: ${uploadResponse.status}`);
+        const errorText = await uploadResponse.text();
+        throw new Error(`HTTP error! status: ${uploadResponse.status}, message: ${errorText}`);
       }
       const uploadData = await uploadResponse.json()
+      console.log('Upload successful, received data:', uploadData);
 
       console.log('Sending request to:', `${BACKEND_URL}/upscale`);
       const upscaleResponse = await fetch(`${BACKEND_URL}/upscale`, {
@@ -337,10 +340,13 @@ const AppUI = () => {
         },
         body: JSON.stringify({ filenames: uploadData.filenames }),
       })
+      console.log('Upscale response status:', upscaleResponse.status);
       if (!upscaleResponse.ok) {
-        throw new Error(`HTTP error! status: ${upscaleResponse.status}`);
+        const errorText = await upscaleResponse.text();
+        throw new Error(`HTTP error! status: ${upscaleResponse.status}, message: ${errorText}`);
       }
       const upscaleData = await upscaleResponse.json()
+      console.log('Upscale successful, received data:', upscaleData);
 
       console.log('Sending request to:', `${BACKEND_URL}/analyze`);
       const analyzeResponse = await fetch(`${BACKEND_URL}/analyze`, {
@@ -353,10 +359,13 @@ const AppUI = () => {
           upscaled_filenames: upscaleData.upscaled_filenames,
         }),
       })
+      console.log('Analyze response status:', analyzeResponse.status);
       if (!analyzeResponse.ok) {
-        throw new Error(`HTTP error! status: ${analyzeResponse.status}`);
+        const errorText = await analyzeResponse.text();
+        throw new Error(`HTTP error! status: ${analyzeResponse.status}, message: ${errorText}`);
       }
       const analyzeData = await analyzeResponse.json()
+      console.log('Analyze successful, received data:', analyzeData);
 
       const newImages = analyzeData.map((item) => ({
         original: `${BACKEND_URL}/image/${item.original_filename}`,
@@ -371,6 +380,7 @@ const AppUI = () => {
         console.error('Network error: Unable to reach the server. Please check if the backend is running and accessible.');
         console.error('Backend URL:', BACKEND_URL);
       }
+      alert('There was an error uploading your file. Please try again.');
     }
   }
 
