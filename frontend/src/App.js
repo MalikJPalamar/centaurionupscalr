@@ -9,7 +9,7 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
-const BACKEND_URL = 'https://c960ef1a-9ad8-47cc-a409-4df798b5ef95-00-3iwmnseqrzh1o.worf.replit.dev';
+const BACKEND_URL = 'http://localhost:5000';
 
 const LandingPage = ({ setActiveTab }) => {
   const [landingSliderValue, setLandingSliderValue] = useState(50)
@@ -319,7 +319,7 @@ const AppUI = () => {
     files.forEach((file) => formData.append('files', file))
 
     try {
-      console.log('Sending request to:', `${BACKEND_URL}/upload`);
+      console.log('Sending upload request to:', `${BACKEND_URL}/upload`);
       const uploadResponse = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
@@ -332,7 +332,7 @@ const AppUI = () => {
       const uploadData = await uploadResponse.json()
       console.log('Upload successful, received data:', uploadData);
 
-      console.log('Sending request to:', `${BACKEND_URL}/upscale`);
+      console.log('Sending upscale request to:', `${BACKEND_URL}/upscale`);
       const upscaleResponse = await fetch(`${BACKEND_URL}/upscale`, {
         method: 'POST',
         headers: {
@@ -348,7 +348,7 @@ const AppUI = () => {
       const upscaleData = await upscaleResponse.json()
       console.log('Upscale successful, received data:', upscaleData);
 
-      console.log('Sending request to:', `${BACKEND_URL}/analyze`);
+      console.log('Sending analyze request to:', `${BACKEND_URL}/analyze`);
       const analyzeResponse = await fetch(`${BACKEND_URL}/analyze`, {
         method: 'POST',
         headers: {
