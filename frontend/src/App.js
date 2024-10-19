@@ -9,6 +9,7 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
+const BACKEND_URL = 'http://localhost:5000';
 
 const LandingPage = ({ setActiveTab }) => {
   const [landingSliderValue, setLandingSliderValue] = useState(50)
@@ -318,13 +319,13 @@ const AppUI = () => {
     files.forEach((file) => formData.append('files', file))
 
     try {
-      const uploadResponse = await fetch('http://localhost:5000/upload', {
+      const uploadResponse = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
       })
       const uploadData = await uploadResponse.json()
 
-      const upscaleResponse = await fetch('http://localhost:5000/upscale', {
+      const upscaleResponse = await fetch(`${BACKEND_URL}/upscale`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -333,7 +334,7 @@ const AppUI = () => {
       })
       const upscaleData = await upscaleResponse.json()
 
-      const analyzeResponse = await fetch('http://localhost:5000/analyze', {
+      const analyzeResponse = await fetch(`${BACKEND_URL}/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -346,8 +347,8 @@ const AppUI = () => {
       const analyzeData = await analyzeResponse.json()
 
       const newImages = analyzeData.map((item) => ({
-        original: `http://localhost:5000/image/${item.original_filename}`,
-        upscaled: `http://localhost:5000/image/${item.upscaled_filename}`,
+        original: `${BACKEND_URL}/image/${item.original_filename}`,
+        upscaled: `${BACKEND_URL}/image/${item.upscaled_filename}`,
         analysis: item.analysis,
       }))
 
