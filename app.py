@@ -42,11 +42,12 @@ def upload_files():
     
     uploaded_files = []
     for file in files:
-        filename = secure_filename(file.filename)
-        unique_filename = f"{uuid.uuid4()}_{filename}"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-        file.save(file_path)
-        uploaded_files.append(unique_filename)
+        if file.filename:
+            filename = secure_filename(file.filename)
+            unique_filename = f"{uuid.uuid4()}_{filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
+            uploaded_files.append(unique_filename)
     
     app.logger.info(f'Successfully uploaded {len(uploaded_files)} files')
     return jsonify({'filenames': uploaded_files}), 200
