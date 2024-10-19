@@ -2,16 +2,22 @@ import os
 import uuid
 import asyncio
 import aiohttp
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, current_app
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from image_processing import upscale_image
 from image_analysis import analyze_image
+import logging
 
 app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 app.config['UPLOAD_FOLDER'] = 'static/temp'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -22,10 +28,13 @@ def home():
 
 @app.route('/upload', methods=['POST'])
 def upload_files():
+    current_app.logger.info('Received upload request')
     if 'files' not in request.files:
+        current_app.logger.error('No file part in the request')
         return jsonify({'error': 'No file part'}), 400
     files = request.files.getlist('files')
     if not files or files[0].filename == '':
+        current_app.logger.error('No selected files')
         return jsonify({'error': 'No selected files'}), 400
     
     uploaded_files = []
@@ -36,6 +45,7 @@ def upload_files():
         file.save(file_path)
         uploaded_files.append(unique_filename)
     
+    current_app.logger.info(f'Successfully uploaded {len(uploaded_files)} files')
     return jsonify({'filenames': uploaded_files}), 200
 
 async def process_image(filename, input_path, output_path):
@@ -43,14 +53,16 @@ async def process_image(filename, input_path, output_path):
         await asyncio.to_thread(upscale_image, input_path, output_path)
         return output_path
     except Exception as e:
-        print(f"Error processing {filename}: {str(e)}")
+        current_app.logger.error(f"Error processing {filename}: {str(e)}")
         return None
 
 @app.route('/upscale', methods=['POST'])
 async def upscale():
+    current_app.logger.info('Received upscale request')
     data = request.json
     filenames = data.get('filenames')
     if not filenames:
+        current_app.logger.error('No filenames provided for upscaling')
         return jsonify({'error': 'No filenames provided'}), 400
     
     upscaled_files = []
@@ -58,6 +70,7 @@ async def upscale():
     for filename in filenames:
         input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if not os.path.exists(input_path):
+            current_app.logger.error(f'File not found: {filename}')
             return jsonify({'error': f'File not found: {filename}'}), 404
         
         output_filename = f"upscaled_{filename}"
@@ -69,6 +82,7 @@ async def upscale():
     results = await asyncio.gather(*tasks)
     upscaled_files = [os.path.basename(path) for path in results if path]
     
+    current_app.logger.info(f'Successfully upscaled {len(upscaled_files)} files')
     return jsonify({'upscaled_filenames': upscaled_files}), 200
 
 async def analyze_image_async(original_path, upscaled_path):
@@ -76,16 +90,18 @@ async def analyze_image_async(original_path, upscaled_path):
         result = await asyncio.to_thread(analyze_image, original_path, upscaled_path)
         return result
     except Exception as e:
-        print(f"Error analyzing {original_path} and {upscaled_path}: {str(e)}")
+        current_app.logger.error(f"Error analyzing {original_path} and {upscaled_path}: {str(e)}")
         return None
 
 @app.route('/analyze', methods=['POST'])
 async def analyze():
+    current_app.logger.info('Received analyze request')
     data = request.json
     original_filenames = data.get('original_filenames')
     upscaled_filenames = data.get('upscaled_filenames')
     
     if not original_filenames or not upscaled_filenames or len(original_filenames) != len(upscaled_filenames):
+        current_app.logger.error('Invalid filenames provided for analysis')
         return jsonify({'error': 'Invalid filenames provided'}), 400
     
     analysis_results = []
@@ -95,6 +111,7 @@ async def analyze():
         upscaled_path = os.path.join(app.config['UPLOAD_FOLDER'], upscaled_filename)
         
         if not os.path.exists(original_path) or not os.path.exists(upscaled_path):
+            current_app.logger.error(f'One or both files not found: {original_filename}, {upscaled_filename}')
             return jsonify({'error': f'One or both files not found: {original_filename}, {upscaled_filename}'}), 404
         
         task = asyncio.create_task(analyze_image_async(original_path, upscaled_path))
@@ -109,6 +126,7 @@ async def analyze():
                 'analysis': result
             })
     
+    current_app.logger.info(f'Successfully analyzed {len(analysis_results)} image pairs')
     return jsonify(analysis_results), 200
 
 @app.route('/image/<filename>')

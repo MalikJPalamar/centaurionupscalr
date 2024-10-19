@@ -323,6 +323,9 @@ const AppUI = () => {
         method: 'POST',
         body: formData,
       })
+      if (!uploadResponse.ok) {
+        throw new Error(`HTTP error! status: ${uploadResponse.status}`);
+      }
       const uploadData = await uploadResponse.json()
 
       const upscaleResponse = await fetch(`${BACKEND_URL}/upscale`, {
@@ -332,6 +335,9 @@ const AppUI = () => {
         },
         body: JSON.stringify({ filenames: uploadData.filenames }),
       })
+      if (!upscaleResponse.ok) {
+        throw new Error(`HTTP error! status: ${upscaleResponse.status}`);
+      }
       const upscaleData = await upscaleResponse.json()
 
       const analyzeResponse = await fetch(`${BACKEND_URL}/analyze`, {
@@ -344,6 +350,9 @@ const AppUI = () => {
           upscaled_filenames: upscaleData.upscaled_filenames,
         }),
       })
+      if (!analyzeResponse.ok) {
+        throw new Error(`HTTP error! status: ${analyzeResponse.status}`);
+      }
       const analyzeData = await analyzeResponse.json()
 
       const newImages = analyzeData.map((item) => ({
@@ -354,7 +363,10 @@ const AppUI = () => {
 
       setImages(newImages)
     } catch (error) {
-      console.error('Error processing images:', error)
+      console.error('Error processing images:', error);
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error('Network error: Unable to reach the server. Please check if the backend is running and accessible.');
+      }
     }
   }
 
