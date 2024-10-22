@@ -10,99 +10,7 @@ import './index.css'
 const zoomLevels = [2, 4, 8, 16, 32]
 const BACKEND_URL = 'http://localhost:5000'
 
-const LandingPage = ({ setActiveTab }) => {
-  const [landingSliderValue, setLandingSliderValue] = useState(50)
-
-  const handleLandingSliderChange = (e) => {
-    setLandingSliderValue(Number(e.target.value))
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900">
-      <header className="container mx-auto px-4 py-8">
-        <nav className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src="/placeholder.svg?height=40&width=40" alt="Centaurion Logo" className="h-10 w-10" />
-            <span className="text-2xl font-bold">Centaurion Slidr</span>
-          </div>
-          <Button variant="ghost">Sign Up</Button>
-        </nav>
-      </header>
-
-      <main className="container mx-auto px-4 py-16">
-        <section className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6">Enhance Your Images with AI</h1>
-          <p className="text-xl text-gray-600 mb-8">Experience the power of AI-driven image upscaling with Centaurion Slidr</p>
-          <Button className="text-lg px-8 py-6" onClick={() => setActiveTab("app")}>
-            Get Started
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </section>
-
-        <section className="mb-16">
-          <div className="relative w-full h-[400px] rounded-xl overflow-hidden shadow-2xl">
-            <img
-              src="/placeholder.svg?height=400&width=800"
-              alt="Original"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-            <div
-              className="absolute top-0 left-0 w-full h-full"
-              style={{
-                clipPath: `inset(0 ${100 - landingSliderValue}% 0 0)`,
-              }}
-            >
-              <img
-                src="/placeholder.svg?height=400&width=800"
-                alt="Upscaled"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={landingSliderValue}
-              onChange={handleLandingSliderChange}
-              className="absolute top-1/2 left-0 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-12 [&::-webkit-slider-thumb]:w-1 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
-            />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-1 bg-white rounded-full shadow-md pointer-events-none" />
-          </div>
-        </section>
-
-        <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {[
-            { icon: Zap, title: 'AI Upscaling', description: 'Powered by Real-ESRGAN for stunning results' },
-            { icon: Maximize, title: 'Magnifier Tool', description: 'Zoom in up to 32x with logarithmic scaling' },
-            { icon: BarChart2, title: 'Quality Analysis', description: 'Compare histograms, PSNR, SSIM, and more' },
-            { icon: Layers, title: 'Slider Comparison', description: 'Easily compare original and upscaled images' },
-          ].map((feature, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl shadow-lg">
-              <feature.icon className="h-12 w-12 text-primary mb-4" />
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to enhance your images?</h2>
-          <Button className="text-lg px-8 py-6" onClick={() => setActiveTab("app")}>
-            Try Centaurion Slidr Now
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </section>
-      </main>
-
-      <footer className="bg-gray-100 py-8 mt-16">
-        <div className="container mx-auto px-4 text-center text-gray-600">
-          &copy; 2023 Centaurion Slidr. All rights reserved.
-        </div>
-      </footer>
-    </div>
-  )
-}
-
+// Components
 const ImageComparison = ({ images, currentIndex }) => {
   const [sliderValue, setSliderValue] = useState(50)
   const [zoomIndex, setZoomIndex] = useState(0)
@@ -411,11 +319,104 @@ const AppUI = () => {
   )
 }
 
-function CentaurionSlidrCombined() {
+const LandingPage = ({ setActiveTab }) => {
+  const [landingSliderValue, setLandingSliderValue] = useState(50)
+
+  const handleLandingSliderChange = (e) => {
+    setLandingSliderValue(Number(e.target.value))
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900">
+      <header className="container mx-auto px-4 py-8">
+        <nav className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <img src="/placeholder.svg?height=40&width=40" alt="Centaurion Logo" className="h-10 w-10" />
+            <span className="text-2xl font-bold">Centaurion Slidr</span>
+          </div>
+          <Button variant="ghost">Sign Up</Button>
+        </nav>
+      </header>
+
+      <main className="container mx-auto px-4 py-16">
+        <section className="text-center mb-16">
+          <h1 className="text-5xl font-bold mb-6">Enhance Your Images with AI</h1>
+          <p className="text-xl text-gray-600 mb-8">Experience the power of AI-driven image upscaling with Centaurion Slidr</p>
+          <Button className="text-lg px-8 py-6" onClick={() => setActiveTab("app")}>
+            Get Started
+            <ArrowRight className="ml-2 h-5 w-4" />
+          </Button>
+        </section>
+
+        <section className="mb-16">
+          <div className="relative w-full h-[400px] rounded-xl overflow-hidden shadow-2xl">
+            <img
+              src="/placeholder.svg?height=400&width=800"
+              alt="Original"
+              className="absolute top-0 left-0 w-full h-full object-cover"
+            />
+            <div
+              className="absolute top-0 left-0 w-full h-full"
+              style={{
+                clipPath: `inset(0 ${100 - landingSliderValue}% 0 0)`,
+              }}
+            >
+              <img
+                src="/placeholder.svg?height=400&width=800"
+                alt="Upscaled"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={landingSliderValue}
+              onChange={handleLandingSliderChange}
+              className="absolute top-1/2 left-0 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-12 [&::-webkit-slider-thumb]:w-1 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-1 bg-white rounded-full shadow-md pointer-events-none" />
+          </div>
+        </section>
+
+        <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {[
+            { icon: Zap, title: 'AI Upscaling', description: 'Powered by Real-ESRGAN for stunning results' },
+            { icon: Maximize, title: 'Magnifier Tool', description: 'Zoom in up to 32x with logarithmic scaling' },
+            { icon: BarChart2, title: 'Quality Analysis', description: 'Compare histograms, PSNR, SSIM, and more' },
+            { icon: Layers, title: 'Slider Comparison', description: 'Easily compare original and upscaled images' },
+          ].map((feature, index) => (
+            <div key={index} className="bg-white p-6 rounded-xl shadow-lg">
+              <feature.icon className="h-12 w-12 text-primary mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to enhance your images?</h2>
+          <Button className="text-lg px-8 py-6" onClick={() => setActiveTab("app")}>
+            Try Centaurion Slidr Now
+            <ArrowRight className="ml-2 h-5 w-4" />
+          </Button>
+        </section>
+      </main>
+
+      <footer className="bg-gray-100 py-8 mt-16">
+        <div className="container mx-auto px-4 text-center text-gray-600">
+          &copy; 2023 Centaurion Slidr. All rights reserved.
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+const CentaurionSlidrCombined = () => {
   const [activeTab, setActiveTab] = useState("landing")
 
   return (
-    <Tabs value={activeTab} onChange={setActiveTab}>
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList>
         <TabsTrigger value="landing">Landing Page</TabsTrigger>
         <TabsTrigger value="app">App UI</TabsTrigger>
