@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-export function Tabs({ value, onChange, children, ...props }) {
+export function Tabs({ value, onValueChange, children, ...props }) {
   return <div {...props}>{children}</div>
 }
 
@@ -21,7 +21,7 @@ export function TabsTrigger({ value: tabValue, children, ...props }) {
       className={`px-4 py-2 rounded-md ${
         isSelected ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
       }`}
-      onClick={() => props.onChange?.(tabValue)}
+      onClick={() => props.onValueChange?.(tabValue)}
       {...props}
     >
       {children}
