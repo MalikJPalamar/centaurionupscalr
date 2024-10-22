@@ -1,3 +1,4 @@
+{/* Previous imports remain the same */}
 import React, { useState, useRef } from 'react'
 import { Button } from "./components/ui/button"
 import { Slider } from "./components/ui/slider"
@@ -9,13 +10,27 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'http://localhost:5000'
 
-// Rest of the file content remains the same
-const LandingPage = ({ setActiveTab }) => {
-  // ... existing code ...
+{/* Previous components remain the same */}
+
+function CentaurionSlidrCombined() {
+  const [activeTab, setActiveTab] = useState("landing")
+
+  return (
+    <Tabs value={activeTab} onChange={setActiveTab}>
+      <TabsList>
+        <TabsTrigger value="landing">Landing Page</TabsTrigger>
+        <TabsTrigger value="app">App UI</TabsTrigger>
+      </TabsList>
+      <TabsContent value="landing">
+        <LandingPage setActiveTab={setActiveTab} />
+      </TabsContent>
+      <TabsContent value="app">
+        <AppUI />
+      </TabsContent>
+    </Tabs>
+  )
 }
-
-// ... rest of the existing components and code ...
 
 export default CentaurionSlidrCombined
