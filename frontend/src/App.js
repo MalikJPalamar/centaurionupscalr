@@ -8,7 +8,7 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
-const BACKEND_URL = window.location.protocol + '//' + window.location.hostname.replace('3000', '5000')
+const BACKEND_URL = 'https://' + window.location.hostname.replace('3000', '5000')
 console.log('Backend URL:', BACKEND_URL)
 
 // Components
@@ -185,7 +185,8 @@ const AppUI = () => {
       const uploadResponse = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
-        credentials: 'include',
+        mode: 'cors',
+        credentials: 'same-origin'
       })
       
       if (!uploadResponse.ok) {
@@ -201,7 +202,8 @@ const AppUI = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+        mode: 'cors',
+        credentials: 'same-origin',
         body: JSON.stringify({ filenames: uploadData.filenames }),
       })
 
@@ -218,7 +220,8 @@ const AppUI = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+        mode: 'cors',
+        credentials: 'same-origin',
         body: JSON.stringify({
           original_filenames: uploadData.filenames,
           upscaled_filenames: upscaleData.upscaled_filenames,
