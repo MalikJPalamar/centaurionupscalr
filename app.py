@@ -13,7 +13,7 @@ app = Flask(__name__)
 # Update CORS settings to allow requests from Vercel
 CORS(app, resources={
     r"/*": {
-        "origins": ["*"],  # For development, will be updated with specific Vercel domain
+        "origins": ["https://*.vercel.app"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
