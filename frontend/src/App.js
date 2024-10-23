@@ -8,10 +8,9 @@ import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import './index.css'
 
 const zoomLevels = [2, 4, 8, 16, 32]
-const BACKEND_URL = 'https://' + window.location.hostname.replace('3000', '5000')
+const BACKEND_URL = window.location.protocol + '//' + window.location.hostname.replace('3000', '5000')
 console.log('Backend URL:', BACKEND_URL)
 
-// Components
 const ImageComparison = ({ images, currentIndex }) => {
   const [sliderValue, setSliderValue] = useState(50)
   const [zoomIndex, setZoomIndex] = useState(0)
@@ -181,7 +180,9 @@ const AppUI = () => {
     files.forEach((file) => formData.append('files', file))
 
     try {
-      console.log('Sending upload request to:', `${BACKEND_URL}/upload`)
+      console.log('Attempting to upload files to:', `${BACKEND_URL}/upload`)
+      console.log('FormData contents:', Array.from(formData.entries()))
+      
       const uploadResponse = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
